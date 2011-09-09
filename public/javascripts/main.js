@@ -171,9 +171,13 @@ window.onload = function() {
     
     var start = function() {
         if (! player.isPlaying) {
-            if (query == prev_query) {
+            if (query == null) {
+                $('#message-text')
+                    .css('color', '#f33').text('bad query');
+            } else if (query == prev_query) {
                 if (player.urls.length == 0) {
-                    $('#message-text').text('oops!!! could not found any photos.');
+                    $('#message-text')
+                        .css('color', '#f33').text('oops! could not found any photos.');
                 } else {
                     $('#message-text').text('');
                     $('#tips').show();
@@ -183,18 +187,26 @@ window.onload = function() {
                 }
             } else {
                 $('#progress').show();
-                $('#message-text').text('now loading...');
+                $('#message-text').css('color', '#dcdcdc').text('now loading...');
                 $.get('/search/' + escape(query), function(res) {
-                    var urls = eval('(' + res + ')');
-                    if (urls.length == 0) {
-                        $('#message-text').text('oops! could not found any photos.');
+                    var result, urls;
+                    result = eval('(' + res + ')');
+                    if (result.status == 200) {
+                        urls = result.urls;
+                        if (urls.length == 0) {
+                            $('#message-text')
+                                .css('color', '#f33').text('oops! could not found any photos.');
+                        } else {
+                            player.setUrls(urls);    
+                            $('#message-text').text('');
+                            $('#tips').show();
+                            $('#main').fadeOut('slow', function() {
+                                player.start();
+                            });
+                        }
                     } else {
-                        player.setUrls(urls);    
-                        $('#message-text').text('');
-                        $('#tips').show();
-                        $('#main').fadeOut('slow', function() {
-                            player.start();
-                        });
+                        $('#message-text')
+                            .css('color', '#f33').text('api error?: ' + result.status);
                     }
                     $('#progress').hide();
                 });
@@ -248,7 +260,7 @@ window.onload = function() {
             if (value == '' || value.match('^#?[0-9a-zA-Z]+$')) {
                 query = value;
             } else {
-                // error?
+                query = null;
             }
         }
     });
