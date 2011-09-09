@@ -47,15 +47,16 @@ window.onload = function() {
     }());
     
     
-    var GlitchPlayer = function(ctx, fps) {
-        
+    var GlitchPlayer = function(canvas, fps) {
         this.fps = fps;
         this.urls = [];
         this.isPlaying = false;
         this.gain = 8;
         this.bpm = 120;
         
-        this._ctx = ctx;
+        this._ctx = canvas.getContext('2d');
+        this._ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+        
         this._image = [];
         for (var i = 0; i < 16; i++) {
             this._image[i] = document.createElement('img');
@@ -78,7 +79,6 @@ window.onload = function() {
                     };
                 }(this, this._ctx, this._image[i])));
         }
-        
         this._prevTime = 0;
         this._timerId = 0;
         this._imagePool = {};
@@ -166,12 +166,7 @@ window.onload = function() {
     canvas.height = HEIGHT;
     document.body.appendChild(canvas);
     
-    var ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
-    ctx.strokeStyle = '#dcdcdc';
-    ctx.lineWidth = 5;
-    
-    var player = new GlitchPlayer(ctx, 15),
+    var player = new GlitchPlayer(canvas, 15),
         query = '', prev_query = '*';
     
     var start = function() {

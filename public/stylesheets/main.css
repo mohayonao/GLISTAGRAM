@@ -4,14 +4,15 @@ body {
     overflow: hidden;
 }
 canvas {
-  background: black;
-  width: 100%; height: 100%;
+    background: black;
+    width: 100%; height: 100%;
 }
 
 #main {
     position: absolute;
     top: 25px; left: 25px;
     width: 250px; height: 220px;
+    z-index: 100;
 }
 #main .foreground {
     position: absolute;
@@ -90,6 +91,7 @@ canvas {
     text-align: center;
     font-size: 0.75em;
     display: none;
+    z-index: 100;
 }
 
 .slider label {
