@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>GLISTAGRAM</title>
+    <link href="http://fonts.googleapis.com/css?family=VT323" rel="stylesheet" type="text/css" />
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/blitzer/jquery-ui.css" rel="stylesheet" type="text/css" />
+	<link type="text/css" media="screen" rel="stylesheet" href="/public/stylesheets/main.css" />
+	<link rel="shortcut icon" href="/public/images/favicon.ico">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.min.js" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="/public/javascripts/main.js"></script>
+  </head>
+  <body>
+    <section id="main">
+      <div class="background"></div>
+      <div class="foreground">
+        <header>
+          <h1>GLISTAGRAM</h1>
+          glitched instagram viewer
+        </header>
+        <div id="controller">
+          <div>
+            <input type="text" id="query" name="query" placeholder="username or #tag" />
+            <button id="go">go</button>
+          </div>
+          <div id="message">
+            <img id="progress" src="/public/images/progress.gif" />
+            <p id="message-text"></p>
+          </div>
+          <div class="slider">
+            <label>GAIN</label><div id="gain"></div><var id="gain-val">8</var>
+          </div>
+          <div class="slider">
+            <label>BPM</label><div id="bpm"></div><var id="bpm-val">120</var>
+          </div>
+        </div>
+        <footer>
+          2011 &copy; <a href="http://twitter.com/#!/mohayonao" target="twitter">mohayonao</a>
+        </footer>
+      </div>
+    </section>
+    <span id="tips">space: stop</span>
+  </body>
+</html>
