@@ -170,6 +170,7 @@ window.onload = function() {
         query = '', prev_query = '*';
     
     var start = function() {
+        var _query;
         if (! player.isPlaying) {
             if (query == null) {
                 $('#message-text')
@@ -186,9 +187,10 @@ window.onload = function() {
                     });
                 }
             } else {
+                _query = (query == '') ? 'popular' : query;
                 $('#progress').show();
                 $('#message-text').css('color', '#dcdcdc').text('now loading...');
-                $.get('/search/' + escape(query), function(res) {
+                $.get('/search/' + escape(_query), function(res) {
                     var result, urls;
                     result = eval('(' + res + ')');
                     if (result.status == 200) {

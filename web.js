@@ -70,7 +70,7 @@ app.get('/search/*', function(req, res) {
     };
     
     query = unescape(req.url.substring(8).trim());
-    if (query == '') {
+    if (query == 'popular') {
         buildMedialist('/v1/media/popular');
     } else if (query.match('^#?[0-9a-zA-Z]+$')) {
         if (query[0] == '#') {
