@@ -13,7 +13,6 @@ var http  = require('http'),
 }('devenv.json'));
 
 var ACCESS_TOKEN = process.env.GLISTAGRAM_API_KEY;
-console.log('ACCESS_TOKEN', ACCESS_TOKEN);
 
 var app = express.createServer();
 
@@ -30,12 +29,17 @@ app.get('/search/*', function(req, res) {
         i, imax;
     
     medialist = [];
-    function sendResult() {
+    function sendResult(status, message) {
         var i, imax;
+        if (!message) message = '';
         for (i = 0, imax = medialist.length; i < imax; i++) {
             medialist[i] = '"' + medialist[i] + '"';
         }
-        res.send("[" + medialist.join(",") + "]");
+        res.send("{status:" + status+ ",message:'" + message + "'," +
+                 "urls:[" + medialist.join(",") + "]}");
+        if (status != 200) {
+            console.warn(status, message);
+        }
     }
     
     function buildMedialist(path) {
@@ -57,11 +61,10 @@ app.get('/search/*', function(req, res) {
                     for (i = 0, imax = data.length; i < imax; i++) {
                         medialist.push(data[i]['images']['low_resolution']['url']);
                     }
-                    sendResult();
+                    sendResult(200);
                 });
             } else {
-                console.log("bad status", result.statusCode);
-                sendResult();
+                sendResult(result.statusCode, "api error?");
             }
         });
     };
@@ -95,16 +98,16 @@ app.get('/search/*', function(req, res) {
                             }
                         }
                         if (! isFind) {
-                            console.log("not found");
+                            sendResult(204, "user not found");
                         }
                     });
                 } else {
-                    console.warn("request error?", result.statusCode);
+                    sendResult(result.statusCode, "api error?");
                 }
             });
         }
     } else {
-        console.warn('invalid query?', query);    
+        sendResult(400, "invalid query?");
     }
 });
 
@@ -150,7 +153,7 @@ app.get('/image/*', function(req, res) {
                 });
         }
     } else {
-        console.error('unknown url??', uri);
+        sendResult();
     }
 });
 
