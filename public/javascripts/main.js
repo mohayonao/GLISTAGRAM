@@ -46,7 +46,6 @@ window.onload = function() {
         };
     }());
     
-    
     var GlitchPlayer = function(canvas, fps) {
         this.fps = fps;
         this.urls = [];
@@ -84,33 +83,93 @@ window.onload = function() {
         this._imagePool = {};
         this._orig = null;
         
+        this._query  = '';
+        this._pquery = '*';
+        
         this._i = this._s = this._x = this._y = 0;
     };
     
-    GlitchPlayer.prototype.setUrls = function(urls) {
+    GlitchPlayer.prototype.seturls = function(urls) {
         this.urls = urls;
         this._reloadImage();
     };
     
-    GlitchPlayer.prototype.start = function(callback) {
-        var self = this, waitTimerId;
-        if (this._timerId == 0) {
-            if (! this.urls) this._reloadImage();
-            waitTimerId = setInterval(function() {
-                if (self._orig) {
-                    self._prevTime = new Date().getTime();
-                    self._timerId = setInterval(function() {
-                        self._view();
-                    }, 1000/self.fps);
-                    clearInterval(waitTimerId);
-                    if (callback) callback();
-                }
-            }, 100);
-            this.isPlaying = true;
+    GlitchPlayer.prototype.setq = function(q) {
+        this._query = q;
+    };
+    
+    GlitchPlayer.prototype.start = function() {
+        var self = this;
+        
+        function _start() {
+            var waitTimerId;
+            if (self._timerId == 0) {
+                if (! self.urls) self._reloadImage();
+                waitTimerId = setInterval(function() {
+                    if (self._orig) {
+                        self._prevTime = new Date().getTime();
+                        self._timerId = setInterval(function() {
+                            self._view();
+                        }, 1000/self.fps);
+                        clearInterval(waitTimerId);
+                    }
+                }, 100);
+                self.isPlaying = true;
+            }
         }
+        
+        var query;
+        if (! player.isPlaying) {
+            if (this._query == null) {
+                $('#message-text')
+                    .css('color', '#f33').text('bad query');
+            } else if (this._query == this._pquery) {
+                if (player.urls.length == 0) {
+                    $('#message-text')
+                        .css('color', '#f33').text('oops! could not found any photos.');
+                } else {
+                    $('#message-text').text('');
+                    $('#tips').show();
+                    $('#main').fadeOut('slow', function() {
+                        _start();
+                    });
+                }
+            } else {
+                query = (this._query == '') ? 'popular' : this._query;
+                $('#progress').show();
+                $('#message-text').css('color', '#dcdcdc').text('now loading...');
+                $.get('/search/' + escape(query), function(res) {
+                    var result, urls;
+                    result = eval('(' + res + ')');
+                    if (result.status == 200) {
+                        urls = result.urls;
+                        if (urls.length == 0) {
+                            $('#message-text')
+                                .css('color', '#f33').text('oops! could not found any photos.');
+                        } else {
+                            player.seturls(urls);    
+                            $('#message-text').text('');
+                            $('#tips').show();
+                            $('#main').fadeOut('slow', function() {
+                                _start();
+                            });
+                        }
+                    } else {
+                        $('#message-text')
+                            .css('color', '#f33').text('api error?: ' + result.status);
+                    }
+                    $('#progress').hide();
+                });
+                this._pquery = this._query;
+            }
+        }
+
+
     };
     
     GlitchPlayer.prototype.stop = function() {
+        $('#tips').hide();
+        $('#main').fadeIn('slow');
         if (this._timerId) {
             clearInterval(this._timerId);
         }
@@ -166,62 +225,8 @@ window.onload = function() {
     canvas.height = HEIGHT;
     document.body.appendChild(canvas);
     
-    var player = new GlitchPlayer(canvas, 15),
-        query = '', prev_query = '*';
-    
-    var start = function() {
-        var _query;
-        if (! player.isPlaying) {
-            if (query == null) {
-                $('#message-text')
-                    .css('color', '#f33').text('bad query');
-            } else if (query == prev_query) {
-                if (player.urls.length == 0) {
-                    $('#message-text')
-                        .css('color', '#f33').text('oops! could not found any photos.');
-                } else {
-                    $('#message-text').text('');
-                    $('#tips').show();
-                    $('#main').fadeOut('slow', function() {
-                        player.start();
-                    });
-                }
-            } else {
-                _query = (query == '') ? 'popular' : query;
-                $('#progress').show();
-                $('#message-text').css('color', '#dcdcdc').text('now loading...');
-                $.get('/search/' + escape(_query), function(res) {
-                    var result, urls;
-                    result = eval('(' + res + ')');
-                    if (result.status == 200) {
-                        urls = result.urls;
-                        if (urls.length == 0) {
-                            $('#message-text')
-                                .css('color', '#f33').text('oops! could not found any photos.');
-                        } else {
-                            player.setUrls(urls);    
-                            $('#message-text').text('');
-                            $('#tips').show();
-                            $('#main').fadeOut('slow', function() {
-                                player.start();
-                            });
-                        }
-                    } else {
-                        $('#message-text')
-                            .css('color', '#f33').text('api error?: ' + result.status);
-                    }
-                    $('#progress').hide();
-                });
-                prev_query = query;
-            }
-        }
-    };
-    
-    var stop = function() {
-        player.stop();
-        $('#tips').hide();
-        $('#main').fadeIn('slow');
-    };
+    var player = new GlitchPlayer(canvas, 15);
+        
     
     // UI
     var gain = $('#gain').slider({
@@ -246,25 +251,31 @@ window.onload = function() {
             $('#bpm-val').text(ui.value);
         }});
     
-    var noShortcut = false;
-    $('#query').focus(function() {
-        noShortcut = true;
-    }).blur(function() {
-        noShortcut = false;
+    $('#go').mousedown(function() {
+        player.start();
     });
     
-    $('#go').mousedown(start);
+    $('#tips').mousedown(function() {
+        player.stop();
+    });
     
     $('#query').change(function() {
         var value, isTag;
         value = this.value.trim();
         if (value != query) {
             if (value == '' || value.match('^#?[0-9a-zA-Z]+$')) {
-                query = value;
+                player.setq(value);
             } else {
-                query = null;
+                player.setq(null);
             }
         }
+    });
+    
+    var noShortcut = false;
+    $('#query').focus(function() {
+        noShortcut = true;
+    }).blur(function() {
+        noShortcut = false;
     });
     
     $(window).keypress(function(e) {
@@ -273,9 +284,9 @@ window.onload = function() {
         switch (e.which) {
           case 32: // space
             if (player.isPlaying) {
-                stop();
+                player.stop();
             } else {
-                start();
+                player.start();
             }
             break;
           case 107: // k
@@ -307,6 +318,4 @@ window.onload = function() {
             break;
         }
     });
-    
-    $('#tips').mousedown(stop);
 };
