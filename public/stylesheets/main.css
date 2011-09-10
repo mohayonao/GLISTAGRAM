@@ -56,9 +56,8 @@ a:hover {
     height: 15px;
     margin-bottom: 5px;
 }
-#progress {
+#icon {
     float: left;
-    display: none;
 }
 #message-text {
     margin: 5px 0px 5px 25px;
