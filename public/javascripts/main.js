@@ -134,7 +134,7 @@ window.onload = function() {
                 }
             } else {
                 query = (this._query == '') ? 'popular' : this._query;
-                message('load', 'now loading...');
+                message('load', 'now loading... (cancel:space)');
                 $.get('/search/' + escape(query), function(res) {
                     var result, urls;
                     if (self.isPlaying) {
