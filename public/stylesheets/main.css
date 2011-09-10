@@ -7,6 +7,13 @@ canvas {
     background: black;
     width: 100%; height: 100%;
 }
+a {
+    color: lightskyblue;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
 
 #main {
     position: absolute;
@@ -67,6 +74,10 @@ canvas {
     width: 50px;
 }
 
+#share {
+    clear: both;
+}
+
 #controller:after {
     clear: both;
     content: ".";
@@ -75,13 +86,6 @@ canvas {
 
 #main footer {
     font-size: 10px;
-}
-#main footer a {
-    color: lightskyblue;
-    text-decoration: none;
-}
-#main footer a:hover {
-    text-decoration: underline;
 }
 
 #tips {

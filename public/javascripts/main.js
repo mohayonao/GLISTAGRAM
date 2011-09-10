@@ -117,6 +117,7 @@ window.onload = function() {
         this._timerId = 0;
         this.isPlaying = false;
     };
+    
     GlitchPlayer.prototype._view = function() {
         var now = new Date().getTime(),
             reloadInterval = 60 / this.bpm * 4 * 1000;
@@ -169,18 +170,67 @@ window.onload = function() {
     var player = new GlitchPlayer(canvas, 15),
         query = '', prev_query = '*';
     
+    function tweet(param) {
+        var h = 550,
+            i = 520,
+            j = screen.height,
+            k = screen.width,
+            b,c, lis, url;
+        b = Math.round(k/2-h/2);
+        c = Math.round(j/2-i/2);
+        lis = [
+            "http://twitter.com/share?lang=ja",
+            "text=GLISTAGRAM",
+            "url=" + escape('http://glistagram.herokuapp.com/') + param,
+            "counturl=" + escape('http://glistagram.herokuapp.com/')
+        ];
+        url = lis.join('&');
+        window.open(url, "intent","width="+h+",height="+i+",left="+b+",top="+c);
+    }
+    
+    function message(type, msg) {
+        switch (type) {
+          case 'load':
+            $('#progress').attr('src', '/public/images/progress.gif').show();
+            $('#message-text').css('color', '#dcdcdc').text(msg);
+            break;
+          case 'tweet':
+            $('#progress').attr('src', '/public/images/twitter.png').show();
+            $('#message-text')
+                .text('')
+                .append(
+                    $(document.createElement('a')).text(msg)
+                        .click(function() {
+                            tweet(escape(query)+'?'+gain.slider("value")+'x'+bpm.slider("value"));
+                        })
+                        .attr('href', 'javascript:void(0)')
+            );
+            break;
+          case 'err':
+            $('#progress').attr('src', '').show();
+            $('#message-text').css('color', '#f33').text(msg);
+            break;
+        default:
+            $('#progress').attr('src', '').show();
+            $('#message-text').text('');
+            break;
+        }
+    }
+    
     var start = function() {
         var _query;
         if (! player.isPlaying) {
             if (query == null) {
-                $('#message-text')
-                    .css('color', '#f33').text('bad query');
+                message('err', 'bad query');
             } else if (query == prev_query) {
                 if (player.urls.length == 0) {
-                    $('#message-text')
-                        .css('color', '#f33').text('oops! could not found any photos.');
+                    message('err', 'oops! could not found any photos.');
                 } else {
-                    $('#message-text').text('');
+                    if (query != '') {
+                        message('tweet', 'share on twitter with these params');
+                    } else {
+                        message();
+                    }
                     $('#tips').show();
                     $('#main').fadeOut('slow', function() {
                         player.start();
@@ -189,28 +239,29 @@ window.onload = function() {
             } else {
                 _query = (query == '') ? 'popular' : query;
                 $('#progress').show();
-                $('#message-text').css('color', '#dcdcdc').text('now loading...');
+                message('load', 'now loading...');
                 $.get('/search/' + escape(_query), function(res) {
                     var result, urls;
                     result = eval('(' + res + ')');
                     if (result.status == 200) {
                         urls = result.urls;
                         if (urls.length == 0) {
-                            $('#message-text')
-                                .css('color', '#f33').text('oops! could not found any photos.');
+                            message('err', 'oops! could not found any photos.....');
                         } else {
                             player.setUrls(urls);    
-                            $('#message-text').text('');
+                            if (query != '') {
+                                message('tweet', 'share on twitter with these params');
+                            } else {
+                                message();
+                            }
                             $('#tips').show();
                             $('#main').fadeOut('slow', function() {
                                 player.start();
                             });
                         }
                     } else {
-                        $('#message-text')
-                            .css('color', '#f33').text('api error?: ' + result.status);
+                        message('err', 'api error?: ' + result.status);
                     }
-                    $('#progress').hide();
                 });
                 prev_query = query;
             }
@@ -309,4 +360,20 @@ window.onload = function() {
     });
     
     $('#tips').mousedown(stop);
+    
+    //
+    (function() {
+        var q, s, m;
+        q = unescape(location.pathname.substring(1));
+        if (q.match('^#?[0-9a-zA-Z]+$')) {
+            $('#query').val(q).change();
+            s = location.search.substring(1);
+            m = s.match('^([0-9]{1,2})x([0-9]{2,3})$');
+            if ((m = s.match('^([0-9]{1,2})x([0-9]{2,3})$'))) {
+                gain.slider("value", m[1]|0);
+                bpm.slider("value", m[2]|0);
+            }
+            start();
+        }
+    }());
 };
