@@ -95,7 +95,11 @@ window.onload = function() {
     };
     
     GlitchPlayer.prototype.setq = function(q) {
-        this._query = q;
+        if (q == '' || q.match('^#?[0-9a-zA-Z]+$')) {
+            this._query = q;    
+        } else {
+            this._query = null;
+        }
     };
     
     GlitchPlayer.prototype.start = function() {
@@ -162,8 +166,9 @@ window.onload = function() {
     };
     
     GlitchPlayer.prototype.stop = function() {
+        console.log('Q', this._query);
         if (this._query == '') {
-            message();
+            message('def');
         } else {
             message('tweet', 'share on twitter with params');    
         }
@@ -247,6 +252,7 @@ window.onload = function() {
     }
     
     function message(type, msg) {
+        console.log("message", type);
         switch (type) {
           case 'load':
             $('#icon').attr('src', '/public/images/progress.gif');
@@ -313,13 +319,7 @@ window.onload = function() {
     $('#query').change(function() {
         var value, isTag;
         value = this.value.trim();
-        if (value != query) {
-            if (value == '' || value.match('^#?[0-9a-zA-Z]+$')) {
-                player.setq(value);
-            } else {
-                player.setq(null);
-            }
-        }
+        player.setq(value);
     });
     
     var noShortcut = false;
