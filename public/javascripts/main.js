@@ -235,6 +235,7 @@ window.onload = function() {
             b,c, lis, url;
         b = Math.round(k/2-h/2);
         c = Math.round(j/2-i/2);
+        console.log('param', param);
         lis = [
             "http://twitter.com/share?lang=ja",
             "text=GLISTAGRAM",
@@ -258,7 +259,7 @@ window.onload = function() {
                 .append(
                     $(document.createElement('a')).text(msg)
                         .click(function() {
-                            tweet(escape($('#query').val())+'?'+gain.slider("value")+'x'+bpm.slider("value"));
+                            tweet(escape(escape($('#query').val()))+'?'+gain.slider("value")+'x'+bpm.slider("value"));
                         })
                         .attr('href', 'javascript:void(0)')
             );
