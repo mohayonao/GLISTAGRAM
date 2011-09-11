@@ -20,7 +20,7 @@ app.get('/public/*', function(req, res) {
     res.sendfile('.' + req.url);
 });
 
-app.get('/search/*', function(req, res) {
+app.get('/api/search/*', function(req, res) {
     var query, medialist,
         options,
         i, imax;
@@ -66,7 +66,7 @@ app.get('/search/*', function(req, res) {
         });
     };
     
-    query = unescape(req.url.substring(8).trim());
+    query = unescape(req.url.substring(12).trim());
     if (query == 'popular') {
         buildMedialist('/v1/media/popular');
     } else if (query.match('^#?[0-9a-zA-Z]+$')) {
@@ -109,7 +109,7 @@ app.get('/search/*', function(req, res) {
 });
 
 var cache = {}, Q = [], Q_SIZE = 256;
-app.get('/image/*', function(req, res) {
+app.get('/api/image/*', function(req, res) {
     var uri, target;
     
     function sendResult(image) {
@@ -120,7 +120,7 @@ app.get('/image/*', function(req, res) {
         res.end(image);
     }
     
-    uri = req.url.substring(7);
+    uri = req.url.substring(11);
     if (uri.match('^http://.+?/media/\\d{4}/\\d{2}/\\d{2}/[0-9a-f]+_\\d.jpg$')) {
         if (uri in cache) {
             sendResult(cache[uri]);
