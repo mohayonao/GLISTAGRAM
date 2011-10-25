@@ -309,6 +309,7 @@ window.onload = function() {
         }});
     
     $('#go').mousedown(function() {
+        $('#query').change();
         player.start();
     });
     
