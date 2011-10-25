@@ -139,7 +139,7 @@ window.onload = function() {
             } else {
                 query = (this._query == '') ? 'popular' : this._query;
                 message('load', 'now loading... (cancel:space)');
-                $.get('/search/' + escape(query), function(res) {
+                $.get('/api/search/' + escape(query), function(res) {
                     var result, urls;
                     if (self.isPlaying) {
                         result = eval('(' + res + ')');
@@ -208,7 +208,7 @@ window.onload = function() {
         } else if (url) {
             $.ajax({
                 type: 'GET',
-                url: '/image/' + url,
+                url: '/api/image/' + url,
                 beforeSend: function(xhr) {
                     xhr.overrideMimeType('text/plain; charset=x-user-defined');
                 },
